@@ -65,6 +65,8 @@ export class AdapterCollection extends Adapter {
                     allTargets = allTargets.concat(targets);
                 });
                 resolve(allTargets);
+            }).catch((err) => {
+                reject(err);
             });
         });
     }

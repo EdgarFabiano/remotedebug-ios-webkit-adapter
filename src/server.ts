@@ -118,6 +118,9 @@ export class ProxyServer extends EventEmitter {
             debug('server.http.endpoint/json');
             this._adapter.getTargets().then((targets) => {
                 res.json(targets);
+            }).catch((err) => {
+                debug('server.getTargets.error', err);
+                res.status(500).json({ error: 'Failed to fetch targets' });
             });
         });
 
@@ -125,6 +128,9 @@ export class ProxyServer extends EventEmitter {
             debug('server.http.endpoint/json/list');
             this._adapter.getTargets().then((targets) => {
                 res.json(targets);
+            }).catch((err) => {
+                debug('server.getTargets.error', err);
+                res.status(500).json({ error: 'Failed to fetch targets' });
             });
         });
 

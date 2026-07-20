@@ -4,7 +4,7 @@
 
 import { ProtocolAdapter } from '../protocol';
 import { Target } from '../target';
-import { Logger } from '../../logger';
+import { Logger, debug } from '../../logger';
 import { ScreencastSession } from './screencast';
 
 declare var document: any;
@@ -140,6 +140,9 @@ export abstract class IOSProtocol extends ProtocolAdapter {
                         });
                     }
                 }
+            }).catch((err) => {
+                debug('ios.CSS.getStyleSheet.error %O', err);
+                return null;
             });
 
             promises.push(setStyleText);
@@ -152,6 +155,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
             };
 
             this._target.fireResultToTools(resultId, result);
+        }).catch((err) => {
+            debug('ios.CSS.setStyleTexts.error %O', err);
         });
 
         // Resolve the original promise with null to prevent 'setStyleTexts' from going to the target
@@ -209,6 +214,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
         this._target.callTarget('CSS.addRule', params).then((result) => {
             this.mapRule(result.rule);
             this._target.fireResultToTools(msg.id, result);
+        }).catch((err) => {
+            debug('ios.CSS.addRule.error %O', err);
         });
 
         return Promise.resolve(null);
@@ -332,6 +339,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
                 exceptionDetails: null
             };
             this._target.fireResultToTools(msg.id, results);
+        }).catch((err) => {
+            debug('ios.Runtime.evaluate.error %O', err);
         });
 
         return Promise.resolve(null);
@@ -410,6 +419,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
                 };
 
                 this._target.fireResultToTools(msg.id, mappedResult);
+            }).catch((err) => {
+                debug('ios.DOM.getEventListeners.error %O', err);
             });
 
         return Promise.resolve(null);
@@ -428,6 +439,9 @@ export abstract class IOSProtocol extends ProtocolAdapter {
 
             const pushNode = this._target.callTarget('DOM.pushNodeByBackendIdToFrontend', params).then((result) => {
                 return result.nodeId;
+            }).catch((err) => {
+                debug('ios.DOM.pushNodeByBackendIdToFrontend.error %O', err);
+                return null;
             });
 
             promises.push(pushNode);
@@ -440,6 +454,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
             };
 
             this._target.fireResultToTools(resultId, result);
+        }).catch((err) => {
+            debug('ios.DOM.pushNodesByBackendIdsToFrontend.error %O', err);
         });
 
         // Resolve the original promise with null to prevent 'setStyleTexts' from going to the target
@@ -475,7 +491,11 @@ export abstract class IOSProtocol extends ProtocolAdapter {
         this._target.callTarget('Runtime.evaluate', { expression: 'document.elementFromPoint(' + msg.params.x + ',' + msg.params.y + ')' }).then((obj) => {
             this._target.callTarget('DOM.requestNode', { objectId: obj.result.objectId }).then((result) => {
                 this._target.fireResultToTools(msg.id, { nodeId: result.nodeId });
+            }).catch((err) => {
+                debug('ios.DOM.requestNode.error %O', err);
             });
+        }).catch((err) => {
+            debug('ios.Runtime.evaluate.error %O', err);
         });
 
         return Promise.resolve(null);
@@ -527,6 +547,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
         }).then(result => {
             const title = result.result.value;
             this._target.fireResultToTools(msg.id, { currentIndex: 0, entries: [{ id: 0, url: href, title: title }] });
+        }).catch((err) => {
+            debug('ios.onGetNavigationHistory.error %O', err);
         });
 
         return Promise.resolve(null);
@@ -574,8 +596,12 @@ export abstract class IOSProtocol extends ProtocolAdapter {
         this._target.callTarget('Runtime.evaluate', { expression: exp }).then((result) => {
             if (msg.params.type === 'click') {
                 msg.params.type = 'mouseup';
-                this._target.callTarget('Runtime.evaluate', { expression: exp });
+                this._target.callTarget('Runtime.evaluate', { expression: exp }).catch((err) => {
+                    debug('ios.Runtime.evaluate.error %O', err);
+                });
             }
+        }).catch((err) => {
+            debug('ios.Runtime.evaluate.error %O', err);
         });
 
         return this._target.replyWithEmpty(msg);
@@ -633,6 +659,8 @@ export abstract class IOSProtocol extends ProtocolAdapter {
                     this._target.fireEventToTools('CSS.styleSheetAdded', { header: header });
                 }
             }
+        }).catch((err) => {
+            debug('ios.CSS.getAllStyleSheets.error %O', err);
         });
     }
 

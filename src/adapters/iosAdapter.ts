@@ -45,7 +45,13 @@ export class IOSAdapter extends AdapterCollection {
                     return;
                 }
 
-                const devices: IIOSDeviceTarget[] = JSON.parse(body);
+                let devices: IIOSDeviceTarget[];
+                try {
+                    devices = JSON.parse(body);
+                } catch (e) {
+                    resolve([]);
+                    return;
+                }
                 resolve(devices);
             });
         }).then((devices: IIOSDeviceTarget[]) => {
@@ -73,7 +79,9 @@ export class IOSAdapter extends AdapterCollection {
 
                         // Create a new adapter for this device and add it to our list
                         const adapter = new Adapter(adapterId, this._proxyUrl, { port: port });
-                        adapter.start();
+                        adapter.start().catch((err) => {
+                            debug(`iosAdapter.adapter.start.error`, err);
+                        });
                         adapter.on('socketClosed', (id) => {
                             this.emit('socketClosed', id);
                         });

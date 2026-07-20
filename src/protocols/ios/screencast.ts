@@ -46,6 +46,8 @@ export class ScreencastSession {
                 this._pageScaleFactor = parseInt(parts[2], 10);
 
                 this._timerCookie = setInterval(() => this.recordingLoop(), this._frameInterval);
+            }).catch((err) => {
+                // Failed to get screen dimensions, screencast not available
             });
     }
 
@@ -92,9 +94,13 @@ export class ScreencastSession {
                     sessionId: currentFrame
                 };
                 this._target.fireEventToTools('Page.screencastFrame', frame);
+            }).catch((err) => {
+                // Failed to capture screencast frame
             });
         }, () => {
             // Do nothing
+        }).catch((err) => {
+            // Failed to get scroll offset
         });
     }
 }

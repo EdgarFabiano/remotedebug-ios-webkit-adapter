@@ -169,6 +169,8 @@ export class Target extends EventEmitter {
                     rawMessage = JSON.stringify(filteredMessage);
                     this.sendToTarget(rawMessage);
                 }
+            }).catch((err) => {
+                debug(`target.messageFilter.error`, err);
             });
         } else {
             // Pass it on to the target
@@ -213,6 +215,8 @@ export class Target extends EventEmitter {
                     sequence.then((filteredMessage) => {
                         rawMessage = JSON.stringify(filteredMessage);
                         this.sendToTools(rawMessage);
+                    }).catch((err) => {
+                        debug(`target.messageFilter.error`, err);
                     });
                 } else {
                     // Pass it on to the tools
@@ -249,6 +253,8 @@ export class Target extends EventEmitter {
                 sequence.then((filteredMessage) => {
                     rawMessage = JSON.stringify(filteredMessage);
                     this.sendToTools(rawMessage);
+                }).catch((err) => {
+                    debug(`target.messageFilter.error`, err);
                 });
             } else {
                 // Pass it on to the tools

@@ -31,6 +31,10 @@ server.run(argv.port).then(port => {
     process.exit();
 });
 
+process.on('unhandledRejection', (reason) => {
+    console.error('Unhandled promise rejection:', reason);
+});
+
 process.on('SIGINT', function () {
     server.stop();
     process.exit();

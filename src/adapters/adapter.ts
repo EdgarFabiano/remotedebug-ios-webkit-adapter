@@ -82,7 +82,13 @@ export class Adapter extends EventEmitter {
                 }
 
                 const targets: ITarget[] = [];
-                const rawTargets: ITarget[] = JSON.parse(body);
+                let rawTargets: ITarget[];
+                try {
+                    rawTargets = JSON.parse(body);
+                } catch (e) {
+                    resolve([]);
+                    return;
+                }
                 rawTargets.forEach((t: ITarget) => {
                     targets.push(this.setTargetInfo(t, metadata));
                 });
@@ -172,7 +178,10 @@ export class Adapter extends EventEmitter {
         return new Promise((resolve, reject) => {
             if (this._proxyProc) {
                 reject('adapter.spawnProcess.error, err=process already started');
+                return;
             }
+
+            let settled = false;
 
             this._proxyProc = spawn(path, args, {
                 detached: true,
@@ -181,12 +190,18 @@ export class Adapter extends EventEmitter {
 
             this._proxyProc.on('error', err => {
                 debug(`adapter.spawnProcess.error, err=${err}`);
-                reject(`adapter.spawnProcess.error, err=${err}`);
+                if (!settled) {
+                    settled = true;
+                    reject(`adapter.spawnProcess.error, err=${err}`);
+                }
             });
 
             this._proxyProc.on('close', (code) => {
                 debug(`adapter.spawnProcess.close, code=${code}`);
-                reject(`adapter.spawnProcess.close, code=${code}`);
+                if (!settled) {
+                    settled = true;
+                    reject(`adapter.spawnProcess.close, code=${code}`);
+                }
             });
 
             this._proxyProc.stdout.on('data', data => {
@@ -198,7 +213,10 @@ export class Adapter extends EventEmitter {
             });
 
             setTimeout(() => {
-                resolve(this._proxyProc);
+                if (!settled) {
+                    settled = true;
+                    resolve(this._proxyProc);
+                }
             }, 200);
 
         });
